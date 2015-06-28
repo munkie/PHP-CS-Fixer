@@ -161,6 +161,15 @@ class Fixer
         return $changed;
     }
 
+    /**
+     * @param \SplFileInfo           $file
+     * @param array|FixerInterface[] $fixers
+     * @param bool                   $dryRun
+     * @param bool                   $diff
+     * @param FileCacheManager       $fileCacheManager
+     *
+     * @return array|null
+     */
     public function fixFile(\SplFileInfo $file, array $fixers, $dryRun, $diff, FileCacheManager $fileCacheManager)
     {
         $new = $old = file_get_contents($file->getRealpath());
