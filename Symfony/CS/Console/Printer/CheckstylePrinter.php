@@ -12,10 +12,12 @@
 namespace Symfony\CS\Console\Printer;
 
 use Symfony\Component\Stopwatch\StopwatchEvent;
+use Symfony\CS\ConfigAwareInterface;
+use Symfony\CS\ConfigInterface;
 use Symfony\CS\Fixer;
 use Symfony\CS\FixerInterface;
 
-class CheckstylePrinter implements PrinterInterface
+class CheckstylePrinter implements PrinterInterface, ConfigAwareInterface
 {
     /**
      * @var FixerInterface[]
@@ -35,14 +37,17 @@ class CheckstylePrinter implements PrinterInterface
     );
 
     /**
-     * @param FixerInterface[] $fixers
+     * Sets the active config on the fixer.
+     *
+     * @param ConfigInterface $config
      */
-    public function __construct(array $fixers)
+    public function setConfig(ConfigInterface $config)
     {
-        foreach ($fixers as $fixer) {
+        foreach ($config->getFixers() as $fixer) {
             $this->fixers[$fixer->getName()] = $fixer;
         }
     }
+
 
     /**
      * @param array                 $changed

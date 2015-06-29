@@ -13,8 +13,9 @@ namespace Symfony\CS\Console\Printer;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\StopwatchEvent;
+use Symfony\CS\Console\OutputAwareInterface;
 
-class TextPrinter implements PrinterInterface
+class TextPrinter implements PrinterInterface, OutputAwareInterface
 {
     /**
      * @var OutputInterface
@@ -24,7 +25,7 @@ class TextPrinter implements PrinterInterface
     /**
      * @param OutputInterface $output
      */
-    public function __construct(OutputInterface $output)
+    public function setOutput(OutputInterface $output)
     {
         $this->output = $output;
     }

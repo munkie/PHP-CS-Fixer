@@ -20,10 +20,13 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\CS\Config\Config;
+use Symfony\CS\ConfigAwareInterface;
 use Symfony\CS\ConfigInterface;
 use Symfony\CS\ConfigurationResolver;
+use Symfony\CS\Console\OutputAwareInterface;
 use Symfony\CS\Console\Printer\CheckstylePrinter;
 use Symfony\CS\Console\Printer\JsonPrinter;
+use Symfony\CS\Console\Printer\PrinterInterface;
 use Symfony\CS\Console\Printer\TextPrinter;
 use Symfony\CS\Console\Printer\XmlPrinter;
 use Symfony\CS\ErrorsManager;
@@ -390,22 +393,7 @@ EOF
             $output->writeln('Legend: '.implode(', ', array_unique($legend)));
         }
 
-        switch ($input->getOption('format')) {
-            case 'txt':
-                $printer = new TextPrinter($output);
-                break;
-            case 'xml':
-                $printer = new XmlPrinter();
-                break;
-            case 'json':
-                $printer = new JsonPrinter();
-                break;
-            case 'checkstyle':
-                $printer = new CheckstylePrinter($config->getFixers());
-                break;
-            default:
-                throw new \InvalidArgumentException(sprintf('The format "%s" is not defined.', $input->getOption('format')));
-        }
+        $printer = $this->getPrinter($input->getOption('format'), $output, $config);
 
         $result = $printer->printFixes(
             $changed,
@@ -427,6 +415,44 @@ EOF
         }
 
         return empty($changed) ? 0 : 1;
+    }
+
+    /**
+     * Get fix result printer
+     *
+     * @param string $format Printer format name
+     * @param OutputInterface $output Output do be used by output aware printers
+     * @param ConfigInterface $config Config to be used by config aware printers
+     *
+     * @return PrinterInterface
+     */
+    protected function getPrinter($format, OutputInterface $output, ConfigInterface $config)
+    {
+        switch ($format) {
+            case 'txt':
+                $printer = new TextPrinter();
+                break;
+            case 'xml':
+                $printer = new XmlPrinter();
+                break;
+            case 'json':
+                $printer = new JsonPrinter();
+                break;
+            case 'checkstyle':
+                $printer = new CheckstylePrinter();
+                break;
+            default:
+                throw new \InvalidArgumentException(sprintf('The format "%s" is not defined.', $format));
+        }
+
+        if ($printer instanceof ConfigAwareInterface) {
+            $printer->setConfig($config);
+        }
+        if ($printer instanceof OutputAwareInterface) {
+            $printer->setOutput($output);
+        }
+
+        return $printer;
     }
 
     protected function getFixersHelp()
